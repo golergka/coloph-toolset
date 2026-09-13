@@ -10,8 +10,9 @@ from pydantic import Field, ValidationError
 from coloph_toolset import tool, tool_for
 
 
-@tool(context_parameter=None, hidden_args=("account_discount",))
+@tool(model_hidden_args=("account_discount",))
 def shipping_quote(
+    ctx,
     quantity: Annotated[int, "Number of parcels", Field(gt=0, le=100)],
     destination: Annotated[str | None, "Country code, or null for collection"],
     service: Annotated[Literal["standard", "express"], "Delivery service"] = "standard",
@@ -44,7 +45,7 @@ def main() -> None:
             {
                 "schema": declaration.json_schema(),
                 "arguments": arguments,
-                "quote": shipping_quote(**arguments),
+                "quote": shipping_quote(None, **arguments),
                 "rejected": rejected,
             },
             indent=2,

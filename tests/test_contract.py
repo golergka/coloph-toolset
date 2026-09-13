@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 DEFAULT_LABELS = ["standard"]
 
 
-@tool(hidden_args=("internal",))
+@tool(model_hidden_args=("internal",))
 def quote(
     ctx: UnavailableContext,
     count: Annotated[int, "Count", Field(gt=0)],
@@ -45,9 +45,9 @@ def test_original_function_and_lazy_return_annotations():
         "enabled",
     ]
     assert "ctx" not in declaration.json_schema()["properties"]
-    assert get_origin(declaration.parameters[0].annotation) is Annotated
-    assert get_args(declaration.parameters[0].annotation)[0] is int
-    assert declaration.parameters[0].description == "Count"
+    assert get_origin(declaration.params[0].annotation) is Annotated
+    assert get_args(declaration.params[0].annotation)[0] is int
+    assert declaration.params[0].description == "Count"
 
 
 def test_nullable_required_and_defaults():
@@ -95,9 +95,9 @@ def test_hidden_projection_and_mutable_defaults_are_isolated():
     two = declaration.validate_arguments({"count": 1, "destination": "AR"})
     assert two["labels"] == ["standard"]
     assert (
-        declaration.validate_arguments(
-            {"count": 1, "destination": None, "internal": True}, include_hidden=True
-        )["internal"]
+        declaration.validate_arguments({"count": 1, "destination": None, "internal": True}, include_hidden=True)[
+            "internal"
+        ]
         is True
     )
     assert "internal" in declaration.json_schema(include_hidden=True)["properties"]
@@ -107,14 +107,12 @@ def test_hidden_projection_and_mutable_defaults_are_isolated():
 def test_model_and_validator_normalize_identically():
     declaration = tool_for(quote)
     values = {"count": "3", "destination": "AR", "enabled": "false"}
-    assert declaration.argument_model().model_validate(values).model_dump() == (
-        declaration.validate_arguments(values)
-    )
+    assert declaration.argument_model().model_validate(values).model_dump() == (declaration.validate_arguments(values))
 
 
-def test_no_context_required_boolean_and_missing_docstring():
-    @tool(context_parameter=None)
-    def flag(enabled: bool):
+def test_boolean_and_missing_docstring():
+    @tool()
+    def flag(ctx, enabled: bool):
         return enabled
 
     declaration = tool_for(flag)
@@ -125,8 +123,9 @@ def test_no_context_required_boolean_and_missing_docstring():
 
 
 def test_constraint_kinds_and_list_elements():
-    @tool(context_parameter=None)
+    @tool()
     def constraints(
+        ctx,
         count: Annotated[int, Gt(0)],
         names: Annotated[list[Annotated[str, MinLen(2)]], Field(min_length=1)],
         code: Annotated[str, Field(pattern="^[A-Z]+$")],
@@ -151,9 +150,7 @@ def test_constraint_kinds_and_list_elements():
             declaration.validate_arguments(good | bad)
 
 
-@pytest.mark.parametrize(
-    "annotation", [dict[str, int], Any, int | str, list[list[str]], list[str | None]]
-)
+@pytest.mark.parametrize("annotation", [dict[str, int], Any, int | str, list[list[str]], list[str | None]])
 def test_unsupported_annotations(annotation):
     def fn(ctx, value):
         return value
@@ -190,7 +187,7 @@ def test_invalid_default_including_hidden_is_a_declaration_error():
 
     for hidden in ((), ("value",)):
         with pytest.raises(DeclarationError, match="invalid argument contract"):
-            Tool(fn, hidden_args=hidden).json_schema()
+            Tool(fn, model_hidden_args=hidden).json_schema()
 
 
 def test_none_default_does_not_make_nonnullable_type_nullable():
@@ -211,9 +208,7 @@ def test_wrapped_annotations_resolve_in_original_globals():
 
     declaration = Tool(wrapped)
     assert declaration.validate_arguments({"value": "3"}) == {"value": 3}
-    changed = annotation_with_description(
-        original, inspect.signature(original).parameters["value"], "Changed"
-    )
+    changed = annotation_with_description(original, inspect.signature(original).parameters["value"], "Changed")
     assert changed.__metadata__ == ("Changed",)
 
 
@@ -244,7 +239,7 @@ def test_application_metadata_is_explicit_and_cannot_run_validation_hooks():
     with pytest.raises(DeclarationError):
         Tool(fn).argument_model()
     declaration = Tool(fn, metadata_types=(Reference,))
-    assert declaration.parameters[0].metadata == (marker,)
+    assert declaration.params[0].metadata == (marker,)
     assert declaration.validate_arguments({"value": "demo"}) == {"value": "demo"}
 
 
@@ -271,7 +266,7 @@ def test_invalid_hidden_declarations(hidden):
         return value
 
     with pytest.raises(DeclarationError):
-        Tool(fn, hidden_args=hidden)
+        Tool(fn, model_hidden_args=hidden)
 
 
 def test_async_and_generators_fail_eagerly():
@@ -291,7 +286,7 @@ def test_async_and_generators_fail_eagerly():
 
 def test_unannotated_parameter_fails_lazily():
     declaration = Tool(lambda ctx, value: value)
-    with pytest.raises(DeclarationError, match="missing annotation"):
+    with pytest.raises(DeclarationError, match="must be annotated"):
         declaration.argument_model()
 
 
@@ -324,7 +319,7 @@ def test_schema_mutation_does_not_change_later_exports():
 def test_public_decorator_cannot_replace_existing_metadata():
     with pytest.raises(DeclarationError, match="already has"):
         tool()(quote)
-    with pytest.raises(DeclarationError, match="not decorated"):
+    with pytest.raises(DeclarationError, match="not a @tool-decorated"):
         tool_for(lambda: None)
 
 
@@ -339,6 +334,7 @@ def test_signature_description_override_replaces_field_description():
     def fn(ctx, count: Annotated[int, Field(description="Old", gt=0)] | None):
         return count
 
+    assert Tool(fn).params[0].description == "Old"
     annotation = annotation_with_description(fn, inspect.signature(fn).parameters["count"], "New")
     fn.__annotations__["count"] = annotation
     declaration = Tool(fn)

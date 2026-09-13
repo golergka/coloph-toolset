@@ -24,8 +24,9 @@ from pydantic import Field, ValidationError
 from coloph_toolset import tool, tool_for
 
 
-@tool(context_parameter=None)
+@tool()
 def shipping_quote(
+    ctx,
     quantity: Annotated[int, "Number of parcels", Field(gt=0)],
     destination: Annotated[str | None, "Country code, or null for collection"],
     insured: Annotated[bool, "Include insurance"] = False,
@@ -36,7 +37,7 @@ def shipping_quote(
 declaration = tool_for(shipping_quote)
 schema = declaration.json_schema()
 arguments = declaration.validate_arguments({"quantity": "2", "destination": None})
-result = shipping_quote(**arguments)
+result = shipping_quote(None, **arguments)
 
 try:
     declaration.validate_arguments({"quantity": 0, "destination": None})
@@ -49,12 +50,11 @@ The application owns execution and must use validated arguments at its dispatch 
 
 ## Context and restricted arguments
 
-The default declaration expects a required first parameter named `ctx`.
+The declaration expects a required first parameter named `ctx`.
 Its type is application-owned and its annotation is not evaluated. Context never appears in the argument schema.
-Use `context_parameter="services"` for another name, or `context_parameter=None` for a function without context.
 
 ```python
-@tool(hidden_args=("internal",))
+@tool(model_hidden_args=("internal",))
 def inspect_order(ctx, order: str, internal: bool = False):
     return ctx.lookup(order, internal=internal)
 
@@ -89,4 +89,5 @@ uv build
 uv run python scripts/smoke_wheel.py
 ```
 
-MIT licensed. The generic declaration layer originated in [Coloph](https://github.com/golergka/coloph).
+MIT licensed. The decorator and schema builder are extracted from
+[Coloph](https://github.com/golergka/coloph), with application metadata removed.

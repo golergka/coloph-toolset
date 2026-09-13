@@ -9,9 +9,7 @@ from pydantic import ValidationError
 
 from coloph_toolset import tool_for
 
-spec = importlib.util.spec_from_file_location(
-    "shipping_quote", Path(__file__).with_name("shipping_quote.py")
-)
+spec = importlib.util.spec_from_file_location("shipping_quote", Path(__file__).with_name("shipping_quote.py"))
 assert spec and spec.loader
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
@@ -33,6 +31,6 @@ def test_quote_and_rejections(capsys):
 def test_collection_and_insurance():
     declaration = tool_for(module.shipping_quote)
     values = declaration.validate_arguments({"quantity": 1, "destination": None, "insured": True})
-    assert module.shipping_quote(**values)["amount_cents"] == 200
+    assert module.shipping_quote(None, **values)["amount_cents"] == 200
     with pytest.raises(ValidationError):
         declaration.validate_arguments({"quantity": 101, "destination": "AR"})

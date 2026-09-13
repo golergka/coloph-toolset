@@ -1,18 +1,21 @@
 """Python tool declarations and canonical argument validation."""
 
-from ._annotations import DeclarationError, annotation_with_description
-from ._declaration import (
-    Parameter,
+from ._decorator import (
+    DeclarationError,
     Tool,
+    ToolParam,
+    annotation_with_description,
+    signature_with_tool_params,
     tool,
     tool_for,
 )
 
 __all__ = [
     "DeclarationError",
-    "Parameter",
     "Tool",
+    "ToolParam",
     "annotation_with_description",
+    "signature_with_tool_params",
     "tool",
     "tool_for",
 ]

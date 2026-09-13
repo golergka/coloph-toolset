@@ -24,9 +24,7 @@ def main() -> None:
         environment = temporary / "environment"
         subprocess.run(["uv", "venv", "--python", sys.executable, str(environment)], check=True)
         python = environment / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
-        subprocess.run(
-            ["uv", "pip", "install", "--python", str(python), wheel, "pytest"], check=True
-        )
+        subprocess.run(["uv", "pip", "install", "--python", str(python), wheel, "pytest"], check=True)
         for example in sorted((root / "examples").iterdir()):
             if not example.is_dir():
                 continue
@@ -36,9 +34,7 @@ def main() -> None:
                 target,
                 ignore=shutil.ignore_patterns(".venv", "__pycache__", ".pytest_cache"),
             )
-            subprocess.run(
-                [str(python), "-I", "-m", "pytest", "-q", str(target)], cwd=temporary, check=True
-            )
+            subprocess.run([str(python), "-I", "-m", "pytest", "-q", str(target)], cwd=temporary, check=True)
             print(f"Installed-wheel example passed: {example.name}", flush=True)
 
 
