@@ -1,6 +1,7 @@
 """Inspect parameter annotations without evaluating context or return annotations."""
 
 from __future__ import annotations
+import __future__
 
 import inspect
 import sys
@@ -17,7 +18,13 @@ class DeclarationError(TypeError):
 
 def function_signature(fn: Callable[..., Any]) -> inspect.Signature:
     """Avoid eager annotation evaluation on Python 3.14 as well as older Python."""
-    if sys.version_info >= (3, 14) and getattr(inspect.unwrap(fn), "__annotate__", None):
+    original = inspect.unwrap(fn)
+    string_annotations = original.__code__.co_flags & __future__.annotations.compiler_flag
+    if (
+        sys.version_info >= (3, 14)
+        and not string_annotations
+        and getattr(original, "__annotate__", None)
+    ):
         from annotationlib import Format
 
         return inspect.signature(fn, annotation_format=Format.STRING)
