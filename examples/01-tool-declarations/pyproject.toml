@@ -1,0 +1,8 @@
+[project]
+name = "toolset-shipping-quote-example"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["coloph-toolset @ https://github.com/golergka/coloph-toolset/releases/download/v0.1.0/coloph_toolset-0.1.0-py3-none-any.whl"]
+
+[dependency-groups]
+dev = ["pytest>=8,<10"]
