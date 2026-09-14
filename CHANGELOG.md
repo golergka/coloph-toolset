@@ -2,7 +2,6 @@
 
 ## 0.1.0
 
-- Extract the decorator and schema builder from Coloph commit `5b4764ce`.
 - Add lazy function declarations and parameter inspection.
 - Generate JSON Schema and argument models from the same retained annotations.
 - Preserve supported constraints, nullable required inputs, defaults, and hidden argument projections.

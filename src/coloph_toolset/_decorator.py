@@ -4,9 +4,6 @@ A `@tool`-decorated function carries a `Tool` description on `fn.tool`. The
 function signature + per-parameter annotations + docstring are the single
 source of truth. Introspection is LAZY and PER-PARAMETER so that return
 annotations (which may reference TYPE_CHECKING-only names) are never evaluated.
-
-Extracted from ``core/tools/_decorator.py`` in Coloph commit
-``5b4764ce6b0382af88f69275305d0fafaf0dfcba``.
 """
 
 from __future__ import annotations

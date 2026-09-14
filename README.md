@@ -89,5 +89,4 @@ uv build
 uv run python scripts/smoke_wheel.py
 ```
 
-MIT licensed. The decorator and schema builder are extracted from
-[Coloph](https://github.com/golergka/coloph), with application metadata removed.
+MIT licensed.

@@ -1,8 +1,4 @@
-"""Schema-backed argument contract copied from Coloph's capability help.
-
-Extracted from ``core/tools/_capability_help.py::tool_argument_model`` in
-Coloph commit ``5b4764ce6b0382af88f69275305d0fafaf0dfcba``.
-"""
+"""Schema-backed argument contract for tool declarations."""
 
 from __future__ import annotations
 

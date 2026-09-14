@@ -1,6 +1,6 @@
 # Extraction milestones
 
-The [Coloph epic](https://github.com/golergka/coloph/issues/1332) tracks six sequential releases.
+The extraction plan tracks six sequential releases.
 
 1. Declarations, canonical argument validation, and the shipping-quote example.
 2. Catalogs, lazy trees, CLI generation, and a task CLI example.
