@@ -10,12 +10,19 @@ version = tomllib.loads((root / "pyproject.toml").read_text())["project"]["versi
 tag = os.environ["RELEASE_TAG"]
 if tag != f"v{version}":
     raise SystemExit(f"Tag {tag!r} does not match package version {version!r}")
-artifacts = sorted((root / "dist").iterdir())
-if {file.name for file in artifacts} != {
+expected_names = {
     f"coloph_toolset-{version}-py3-none-any.whl",
     f"coloph_toolset-{version}.tar.gz",
-}:
+}
+dist_files = sorted((root / "dist").iterdir())
+unexpected = {
+    file.name
+    for file in dist_files
+    if file.name not in expected_names and not file.name.endswith(".publish.attestation")
+}
+if not expected_names <= {file.name for file in dist_files} or unexpected:
     raise SystemExit("The release must contain exactly the matching wheel and source archive")
+artifacts = [root / "dist" / name for name in sorted(expected_names)]
 subprocess.run(
     [
         "gh",
