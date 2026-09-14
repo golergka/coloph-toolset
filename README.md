@@ -7,10 +7,8 @@ Later releases add catalogs and adapters. The [roadmap](docs/roadmap.md) describ
 
 ## Install
 
-Install the wheel from the [v0.1.0 release](https://github.com/golergka/coloph-toolset/releases/tag/v0.1.0):
-
 ```sh
-uv pip install https://github.com/golergka/coloph-toolset/releases/download/v0.1.0/coloph_toolset-0.1.0-py3-none-any.whl
+uv add coloph-toolset
 ```
 
 The package requires Python 3.11 or later and Pydantic 2.12 or later within major version 2.

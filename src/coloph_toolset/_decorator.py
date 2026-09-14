@@ -94,7 +94,7 @@ class Tool:
         name: str | None = None,
         descriptions: dict[str, str] | None = None,
     ) -> Any:
-        from ._capability_help import tool_argument_model
+        from ._argument_model import tool_argument_model
 
         return tool_argument_model(
             self,
