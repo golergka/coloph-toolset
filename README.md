@@ -2,8 +2,9 @@
 
 Declare Python tools once. Export their JSON Schema and validate arguments before your application calls the function.
 
-Version 0.1 provides declarations and validation. It does not manage execution, transactions, authorization, or model providers.
-Later releases add catalogs and adapters. The [roadmap](docs/roadmap.md) describes that sequence.
+Version 0.2 adds catalogs, deferred command groups, exact selections, and generated CLIs.
+The application owns execution, transactions, authorization, and model providers.
+The [roadmap](docs/roadmap.md) describes later adapters. The package remains on `0.x` while its interfaces settle.
 
 ## Install
 
@@ -69,7 +70,9 @@ Argument projection is not an authorization system.
 ## Contracts and examples
 
 - [Argument contract and API](docs/contracts.md)
+- [Catalog and CLI contract](docs/catalogs-cli.md)
 - [Standalone shipping-quote project](examples/01-tool-declarations/README.md)
+- [Standalone task CLI](examples/02-task-cli/README.md)
 - [Development and release procedure](CONTRIBUTING.md)
 - [Changes](CHANGELOG.md)
 

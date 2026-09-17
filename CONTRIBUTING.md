@@ -18,7 +18,8 @@ Examples must use public imports and work without a Coloph checkout or private s
 
 ## Release
 
-This package initially distributes wheels and source archives through GitHub Releases. It does not require a PyPI publishing credential.
+The release workflow publishes matching artifacts to PyPI and GitHub Releases through trusted publishing.
+Keep package versions on `0.x` until the user explicitly approves `1.0`.
 
 1. Update the version and changelog.
 2. Run all local checks and the clean wheel smoke.
@@ -33,4 +34,4 @@ The package version, tag, and release notes must match. Never move an existing r
 Coloph can adopt a release only after the public default branch and release contain its tested commit.
 Record the release and Coloph dependency pin in the owning Coloph issue.
 
-When PyPI distribution is introduced, the release process must publish the same tested artifacts and version there.
+Check that PyPI and GitHub contain the same tested version before consumer adoption.

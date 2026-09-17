@@ -1,6 +1,27 @@
 """Python tool declarations and canonical argument validation."""
 
+from ._call_codec import (
+    PromptToolReferenceError,
+    ToolArgumentParser,
+    ToolCall,
+    ToolCallTemplate,
+    configure_leaf_parser,
+    decode_cli_call,
+    decode_cli_template,
+    decode_native_call,
+    encode_cli_call,
+    encode_native_call,
+    encode_native_group_call,
+    kwargs_from_args,
+    native_call_json,
+    parameter_flags,
+    tool_call_template,
+    validate_cli,
+)
+from ._cli import build_parser_from_tree
+from ._compiled_tree import CompiledToolTree, CompiledToolTreeNode
 from ._decorator import (
+    Cli,
     DeclarationError,
     Tool,
     ToolParam,
@@ -9,8 +30,42 @@ from ._decorator import (
     tool,
     tool_for,
 )
+from ._index import ToolCatalog, ToolDefinition, ToolSelection, TreeEntry, build_index, resolve_tool
+from ._tree import DeferredGroup, Exposure, GroupNode, Leaf, TreeNode, effective_exposure
 
 __all__ = [
+    "Cli",
+    "DeferredGroup",
+    "Exposure",
+    "GroupNode",
+    "Leaf",
+    "TreeNode",
+    "effective_exposure",
+    "ToolCatalog",
+    "ToolDefinition",
+    "ToolSelection",
+    "TreeEntry",
+    "build_index",
+    "resolve_tool",
+    "CompiledToolTree",
+    "CompiledToolTreeNode",
+    "ToolArgumentParser",
+    "ToolCall",
+    "ToolCallTemplate",
+    "PromptToolReferenceError",
+    "configure_leaf_parser",
+    "kwargs_from_args",
+    "decode_cli_call",
+    "encode_cli_call",
+    "decode_cli_template",
+    "decode_native_call",
+    "encode_native_call",
+    "native_call_json",
+    "encode_native_group_call",
+    "tool_call_template",
+    "parameter_flags",
+    "validate_cli",
+    "build_parser_from_tree",
     "DeclarationError",
     "Tool",
     "ToolParam",

@@ -26,6 +26,15 @@ DeclarationError = TypeError
 
 
 @dataclass(frozen=True)
+class Cli:
+    """Named flag spelling, aliases, and metavar for a declared parameter."""
+
+    flag: str | None = None
+    metavar: str | None = None
+    aliases: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
 class ToolParam:
     """One named parameter of a tool function (excluding `ctx`)."""
 
@@ -38,6 +47,13 @@ class ToolParam:
     repeated: bool  # list[T] params -> repeatable flag
     nullable: bool
     metadata: tuple[Any, ...]
+
+    @property
+    def cli(self) -> Cli | None:
+        markers = [item for item in self.metadata if isinstance(item, Cli)]
+        if len(markers) > 1:
+            raise TypeError(f"{self.name}: duplicate Cli marker")
+        return markers[0] if markers else None
 
     @property
     def required(self) -> bool:
@@ -53,6 +69,7 @@ class Tool:
     metadata_types: tuple[type, ...] = ()
 
     def __post_init__(self) -> None:
+        self.metadata_types = tuple(dict.fromkeys((*self.metadata_types, Cli)))
         original = inspect.unwrap(self.fn)
         if not inspect.isfunction(original):
             raise TypeError("a tool must be a Python function")

@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "coloph-toolset"
-version = "0.1.0"
-description = "Declare Python tools once, export their schemas, and validate their arguments."
+version = "0.2.0"
+description = "Declare Python tools, validate arguments, and build catalogs and generated CLIs."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
