@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- Permit uv's generated `.gitignore` file in the release artifact directory.
+- Preserve the catalog and CLI contracts from 0.2.0.
+
 ## 0.2.0
 
 - Add catalogs, nested and flattened groups, deferred loading, and deterministic selections.

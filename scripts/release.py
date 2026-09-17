@@ -18,7 +18,7 @@ dist_files = sorted((root / "dist").iterdir())
 unexpected = {
     file.name
     for file in dist_files
-    if file.name not in expected_names and not file.name.endswith(".publish.attestation")
+    if file.name not in expected_names and file.name != ".gitignore" and not file.name.endswith(".publish.attestation")
 }
 if not expected_names <= {file.name for file in dist_files} or unexpected:
     raise SystemExit("The release must contain exactly the matching wheel and source archive")
