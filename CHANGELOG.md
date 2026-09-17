@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3
+
+- Keep the transport test's annotation imports resolvable on Python 3.14.
+- Require the Python 3.11–3.14 and minimum-dependency checks before publication.
+- Preserve the library contracts from 0.2.2.
+
 ## 0.2.2
 
 - Let CLI adapters decode transport values before canonical validation.

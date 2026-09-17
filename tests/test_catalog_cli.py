@@ -3,7 +3,7 @@ from threading import Event
 from typing import Annotated
 
 import pytest
-from annotated_types import Ge, MinLen
+from annotated_types import Ge, MaxLen, MinLen
 from pydantic import ValidationError
 
 from coloph_toolset import (
@@ -39,8 +39,6 @@ def tree(fn=sample):
 
 
 def test_transport_decoding_precedes_constraints_in_codec_and_parser():
-    from annotated_types import MaxLen
-
     @tool()
     def short(ctx, value: Annotated[str, MaxLen(3)]):
         return value

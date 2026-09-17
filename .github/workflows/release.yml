@@ -6,7 +6,12 @@ permissions:
   contents: write
   id-token: write
 jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
   release:
+    needs: checks
     environment:
       name: pypi
       url: https://pypi.org/p/coloph-toolset

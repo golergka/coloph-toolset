@@ -27,7 +27,7 @@ Keep package versions on `0.x` until the user explicitly approves `1.0`.
 4. Push the reviewed commit to the public default branch.
 5. Wait for CI on the exact release commit.
 6. Create an immutable `vX.Y.Z` tag on that commit.
-7. Push the tag. The release workflow reruns tests and publishes the wheel and source archive.
+7. Push the tag. Publication waits for Python 3.11–3.14, minimum-dependency, and clean wheel checks.
 8. Validate the published artifacts in a clean environment.
 
 The package version, tag, and release notes must match. Never move an existing release tag.
