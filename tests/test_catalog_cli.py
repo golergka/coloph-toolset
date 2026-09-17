@@ -148,7 +148,7 @@ def test_invalid_flags_fail_for_lazy_and_eager_resolution(flags):
     def fn(ctx, x: str):
         return x
 
-    fn.__annotations__["x"] = Annotated[str, flags]
+    fn.__annotations__ = {"x": Annotated[str, flags]}
     fn = tool()(fn)
     for operation in (lambda: build_index(tree(fn)), lambda: resolve_tool(tree(fn), ("run",))):
         with pytest.raises(ValueError, match="flag"):
