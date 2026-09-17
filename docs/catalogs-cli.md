@@ -81,3 +81,11 @@ An exact `allowed_dotted` selection takes precedence over default visibility.
 The project remains on `0.x`. Releases can change public interfaces before `1.0`.
 Version `0.2.0` preserves the `0.1` declaration API and its shipping example.
 Applications that adopt the new CLI must account for canonical validation and replacement of repeated defaults.
+
+## Application transport decoding
+
+`decode_cli_call` and `kwargs_from_args` accept an optional `argument_decoder`.
+The callback receives each supplied value before canonical argument validation.
+It must preserve the parameter's expected value type.
+`ToolArgumentParser.validate_tool_arguments` is the corresponding parser override.
+An adapter that decodes once must track that state across nested parser calls.

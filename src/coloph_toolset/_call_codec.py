@@ -8,7 +8,7 @@ import re
 import shlex
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 from ._decorator import ToolParam
 from ._index import ToolCatalog, ToolDefinition
@@ -132,8 +132,12 @@ def declaration_for(tool: Any) -> Any:
     return getattr(tool, "declaration", tool)
 
 
-def kwargs_from_args(tool: Any, args: Namespace) -> dict[str, Any]:
+def kwargs_from_args(
+    tool: Any, args: Namespace, *, argument_decoder: Callable[[Any], Any] | None = None
+) -> dict[str, Any]:
     values = {param.name: getattr(args, param.name) for param in tool.params if hasattr(args, param.name)}
+    if argument_decoder is not None:
+        values = {name: argument_decoder(value) for name, value in values.items()}
     result: dict[str, Any] = declaration_for(tool).validate_arguments(values, include_hidden=True)
     return result
 
@@ -145,6 +149,10 @@ class ToolArgumentParser(ArgumentParser):
         kwargs.setdefault("allow_abbrev", False)
         super().__init__(*args, **kwargs)
 
+    def validate_tool_arguments(self, tool: Any, args: Namespace) -> dict[str, Any]:
+        """Validate a leaf; adapters may decode their transport before validation."""
+        return kwargs_from_args(tool, args)
+
     def parse_known_args(self, args: Any = None, namespace: Any = None) -> tuple[Any, list[str]]:
         from pydantic import ValidationError
 
@@ -152,7 +160,7 @@ class ToolArgumentParser(ArgumentParser):
         bound = getattr(parsed, "_bound", None)
         if bound is not None and not unknown:
             try:
-                values = kwargs_from_args(bound.tool, parsed)
+                values = self.validate_tool_arguments(bound.tool, parsed)
             except ValidationError as exc:
                 self.error(str(exc))
             for name, value in values.items():
@@ -182,7 +190,13 @@ def _resolve_cli_tool(tokens: list[str], catalog: ToolCatalog) -> tuple[ToolDefi
     return bound, remaining
 
 
-def decode_cli_call(text: str, *, catalog: ToolCatalog, executable: str = "tool") -> ToolCall:
+def decode_cli_call(
+    text: str,
+    *,
+    catalog: ToolCatalog,
+    executable: str = "tool",
+    argument_decoder: Callable[[Any], Any] | None = None,
+) -> ToolCall:
     """Decode one complete, named-only executable command literal."""
     from pydantic import ValidationError
 
@@ -197,7 +211,7 @@ def decode_cli_call(text: str, *, catalog: ToolCatalog, executable: str = "tool"
     except (argparse.ArgumentError, SystemExit) as exc:
         raise PromptToolReferenceError(f"invalid arguments for {bound.dotted}: {exc}") from exc
     try:
-        kwargs = kwargs_from_args(bound.tool, args)
+        kwargs = kwargs_from_args(bound.tool, args, argument_decoder=argument_decoder)
     except ValidationError as exc:
         raise PromptToolReferenceError(f"invalid arguments for {bound.dotted}: {exc}") from exc
     hidden = set(bound.tool.model_hidden_args)

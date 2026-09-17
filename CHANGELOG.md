@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+- Let CLI adapters decode transport values before canonical validation.
+- Expose the parser validation hook for application transport adapters.
+- Preserve the duplicate dotted ID diagnostic when sibling paths collide.
+
 ## 0.2.1
 
 - Permit uv's generated `.gitignore` file in the release artifact directory.

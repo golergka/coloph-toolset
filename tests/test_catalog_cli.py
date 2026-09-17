@@ -38,6 +38,35 @@ def tree(fn=sample):
     return GroupNode("root", "Root", (Leaf("run", fn),), exposure={"cli": None})
 
 
+def test_transport_decoding_precedes_constraints_in_codec_and_parser():
+    from annotated_types import MaxLen
+
+    @tool()
+    def short(ctx, value: Annotated[str, MaxLen(3)]):
+        return value
+
+    root = tree(short)
+    catalog = build_index(root)
+
+    def decoder(value):
+        return value.removeprefix("encoded:")
+
+    call = decode_cli_call("tool run --value encoded:yes", catalog=catalog, argument_decoder=decoder)
+    assert call.arguments == {"value": "yes"}
+    with pytest.raises(PromptToolReferenceError):
+        decode_cli_call("tool run --value encoded:long", catalog=catalog, argument_decoder=decoder)
+
+    class DecodingParser(ToolArgumentParser):
+        def validate_tool_arguments(self, tool, args):
+            return kwargs_from_args(tool, args, argument_decoder=decoder)
+
+    cli = DecodingParser()
+    build_parser_from_tree(root, "cli", parser=cli)
+    assert cli.parse_args(["run", "--value", "encoded:yes"]).value == "yes"
+    with pytest.raises(SystemExit):
+        cli.parse_args(["run", "--value", "encoded:long"])
+
+
 def parser(root=None, **kwargs):
     result = ToolArgumentParser(prog="tasks")
     build_parser_from_tree(root or tree(), "cli", parser=result, **kwargs)

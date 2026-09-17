@@ -207,7 +207,7 @@ def _siblings(children: tuple[TreeNode, ...], path: tuple[str, ...]) -> tuple[Tr
                 visit(child)
         else:
             if node.name in names:
-                raise ValueError(f"duplicate command/group path at {'.'.join(path)!r}: {node.name}")
+                raise ValueError(f"duplicate dotted id or command/group path: {'.'.join((*path, node.name))!r}")
             names.add(node.name)
 
     for node in children:
