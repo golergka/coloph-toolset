@@ -1,9 +1,9 @@
 # coloph-toolset
 
-Declare Python tools once. Export their JSON Schema and validate arguments before your application calls the function.
+Declare Python tools once. Export their schema, organize them in catalogs, and run validated synchronous or asynchronous calls.
 
-Version 0.2 adds catalogs, deferred command groups, exact selections, and generated CLIs.
-The application owns execution, transactions, authorization, and model providers.
+Version 0.3 adds typed context, resources, lifecycle hooks, explicit results, and sync or async execution.
+The application owns authorization, business dependencies, resource behavior, and model providers.
 The [roadmap](docs/roadmap.md) describes later adapters. The package remains on `0.x` while its interfaces settle.
 
 ## Install
@@ -47,6 +47,27 @@ except ValidationError as error:
 Validation never calls the function. Calling the Python function directly does not apply validation.
 The application owns execution and must use validated arguments at its dispatch boundary.
 
+## Run tools
+
+```python
+from dataclasses import dataclass
+from coloph_toolset import ToolContext, ToolRuntime
+
+
+@dataclass
+class Session:
+    calls: int = 0
+
+
+runtime = ToolRuntime(dependencies={"region": "eu"}, state_factory=Session)
+result = runtime.invoke_sync(shipping_quote, {"quantity": 2, "destination": None})
+print(result.raw)
+print(result.output)
+```
+
+Use `await runtime.invoke(...)` in asynchronous code. The runtime awaits synchronous and asynchronous tools exactly once.
+Add a `ResourceLifecycle` when each call needs a transaction, client, or other resource.
+
 ## Context and restricted arguments
 
 The declaration expects a required first parameter named `ctx`.
@@ -71,8 +92,10 @@ Argument projection is not an authorization system.
 
 - [Argument contract and API](docs/contracts.md)
 - [Catalog and CLI contract](docs/catalogs-cli.md)
+- [Runtime contract](docs/runtime.md)
 - [Standalone shipping-quote project](examples/01-tool-declarations/README.md)
 - [Standalone task CLI](examples/02-task-cli/README.md)
+- [Standalone inventory runtime](examples/03-tool-runtime/README.md)
 - [Development and release procedure](CONTRIBUTING.md)
 - [Changes](CHANGELOG.md)
 

@@ -16,7 +16,7 @@ Do not mutate a function's signature, annotations, defaults, or declaration afte
 
 ## Supported signatures and types
 
-- Plain synchronous functions with named external arguments. Positional-only external arguments and variadic arguments are rejected.
+- Plain synchronous or asynchronous functions with named external arguments. Positional-only external arguments and variadic arguments are rejected.
 - A required injected context named `ctx` as the first positional parameter.
 - `bool`, `int`, `float`, and `str`.
 - Homogeneous string or integer `Literal` choices.
@@ -24,8 +24,8 @@ Do not mutate a function's signature, annotations, defaults, or declaration afte
 - Nullable forms of those types, including a nullable list.
 - `Annotated` descriptions and the constraint metadata listed next.
 
-Async functions, generators, bound methods, arbitrary callable objects, unconstrained `Any`, mixed unions, and nested models are not supported in 0.1.
-These declarations fail explicitly. Async execution belongs to a later milestone.
+Generators, bound methods, arbitrary callable objects, unconstrained `Any`, mixed unions, and nested models are not supported.
+These declarations fail explicitly. `ToolRuntime.invoke()` awaits asynchronous functions.
 
 ## Metadata
 

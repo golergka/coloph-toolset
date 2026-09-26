@@ -31,6 +31,19 @@ from ._decorator import (
     tool_for,
 )
 from ._index import ToolCatalog, ToolDefinition, ToolSelection, TreeEntry, build_index, resolve_tool
+from ._ctx import ToolContext
+from ._invoke import (
+    Finalization,
+    InvocationError,
+    InvocationEvent,
+    InvocationPhase,
+    InvocationResult,
+    ResourceLifecycle,
+    ToolHook,
+    ToolRuntime,
+    ToolUnavailableError,
+)
+from ._text import PresentedOutput, ToolOutput, canonical_output, limit_output
 from ._tree import DeferredGroup, Exposure, GroupNode, Leaf, TreeNode, effective_exposure
 
 __all__ = [
@@ -73,4 +86,18 @@ __all__ = [
     "signature_with_tool_params",
     "tool",
     "tool_for",
+    "ToolContext",
+    "Finalization",
+    "InvocationError",
+    "InvocationEvent",
+    "InvocationPhase",
+    "InvocationResult",
+    "ResourceLifecycle",
+    "ToolHook",
+    "ToolRuntime",
+    "ToolUnavailableError",
+    "PresentedOutput",
+    "ToolOutput",
+    "canonical_output",
+    "limit_output",
 ]

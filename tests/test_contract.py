@@ -269,7 +269,7 @@ def test_invalid_hidden_declarations(hidden):
         Tool(fn, model_hidden_args=hidden)
 
 
-def test_async_and_generators_fail_eagerly():
+def test_async_functions_are_supported_but_generators_fail_eagerly():
     async def async_fn(ctx, value: str):
         return value
 
@@ -279,8 +279,10 @@ def test_async_and_generators_fail_eagerly():
     async def async_generator(ctx):
         yield 1
 
-    for fn in (async_fn, generator, async_generator):
-        with pytest.raises(DeclarationError, match="async and generator"):
+    assert Tool(async_fn).fn is async_fn
+
+    for fn in (generator, async_generator):
+        with pytest.raises(DeclarationError, match="generator"):
             Tool(fn)
 
 

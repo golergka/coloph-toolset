@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0
+
+- Add `ToolRuntime` for validated synchronous and asynchronous calls.
+- Add typed `ToolContext` values for application dependencies, call state, and resources.
+- Add explicit resource acquisition and finalization with commit state.
+- Add before-call and after-success hooks that receive the raw business result.
+- Add lifecycle events and failures that identify body, finalization, and presentation errors.
+- Preserve raw results while output limits report truncation.
+- Add the standalone inventory runtime example. Keep both earlier examples.
+
 ## 0.2.3
 
 - Keep the transport test's annotation imports resolvable on Python 3.14.

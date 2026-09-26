@@ -75,14 +75,10 @@ class Tool:
             raise TypeError("a tool must be a Python function")
         if any(
             predicate(function)
-            for predicate in (
-                inspect.iscoroutinefunction,
-                inspect.isasyncgenfunction,
-                inspect.isgeneratorfunction,
-            )
+            for predicate in (inspect.isasyncgenfunction, inspect.isgeneratorfunction)
             for function in (self.fn, original)
         ):
-            raise TypeError("async and generator tools are not supported in this release")
+            raise TypeError("generator tools are not supported")
         if any(not isinstance(name, str) for name in self.model_hidden_args):
             raise TypeError("model_hidden_args must contain parameter names")
         if len(set(self.model_hidden_args)) != len(self.model_hidden_args):
