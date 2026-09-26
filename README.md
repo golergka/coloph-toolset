@@ -2,7 +2,7 @@
 
 Declare Python tools once. Export their schema, organize them in catalogs, and run validated synchronous or asynchronous calls.
 
-Version 0.5 adds direct Pydantic AI registration while preserving the declaration, catalog, CLI, runtime, and HTTP APIs.
+Version 0.6 adds authorized hierarchical discovery, first-use documentation gates, and terminal completion signals while preserving the declaration, catalog, CLI, runtime, HTTP, and direct Pydantic AI APIs.
 The application owns authorization, business dependencies, resource behavior, and model providers.
 The [roadmap](docs/roadmap.md) describes later adapters. The package remains on `0.x` while its interfaces settle.
 
@@ -97,11 +97,13 @@ Argument projection is not an authorization system.
 - [Runtime contract](docs/runtime.md)
 - [Starlette HTTP adapter](docs/http.md)
 - [Pydantic AI adapter](docs/pydantic-ai.md)
+- [Hierarchical discovery and dispatch](docs/hierarchical.md)
 - [Standalone shipping-quote project](examples/01-tool-declarations/README.md)
 - [Standalone task CLI](examples/02-task-cli/README.md)
 - [Standalone inventory runtime](examples/03-tool-runtime/README.md)
 - [Standalone authenticated HTTP tools](examples/04-http-tools/README.md)
 - [Standalone deterministic Pydantic AI agent](examples/05-pydantic-agent/README.md)
+- [Standalone hierarchical order agent](examples/06-hierarchical-agent/README.md)
 - [Development and release procedure](CONTRIBUTING.md)
 - [Changes](CHANGELOG.md)
 

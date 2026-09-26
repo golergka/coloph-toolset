@@ -1,9 +1,4 @@
-"""Typed application context for one tool invocation.
-
-This file began as Coloph's ``core/tools/_ctx.py``. The public form keeps the
-per-call ownership model and removes Coloph's database, worker, workflow, and
-pipeline fields.
-"""
+"""Typed application context for one tool invocation."""
 
 from __future__ import annotations
 

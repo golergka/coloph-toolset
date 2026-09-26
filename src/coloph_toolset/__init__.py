@@ -45,6 +45,21 @@ from ._invoke import (
 )
 from ._text import PresentedOutput, ToolOutput, canonical_output, limit_output
 from ._tree import DeferredGroup, Exposure, GroupNode, Leaf, TreeNode, effective_exposure
+from .hierarchical import (
+    Documentation,
+    DocumentationLoader,
+    HierarchicalCompletion,
+    HierarchicalInputError,
+    HierarchicalState,
+    HierarchicalToolAdapter,
+    PreparedToolCall,
+    argument_validation_error,
+    first_use_packet,
+    resolve_root_path,
+    root_call_template,
+    root_dispatch_schema,
+    terminal_tool_succeeded,
+)
 
 __all__ = [
     "Cli",
@@ -96,6 +111,19 @@ __all__ = [
     "ToolHook",
     "ToolRuntime",
     "ToolUnavailableError",
+    "Documentation",
+    "DocumentationLoader",
+    "HierarchicalCompletion",
+    "HierarchicalInputError",
+    "HierarchicalState",
+    "HierarchicalToolAdapter",
+    "PreparedToolCall",
+    "argument_validation_error",
+    "first_use_packet",
+    "resolve_root_path",
+    "root_call_template",
+    "root_dispatch_schema",
+    "terminal_tool_succeeded",
     "PresentedOutput",
     "ToolOutput",
     "canonical_output",

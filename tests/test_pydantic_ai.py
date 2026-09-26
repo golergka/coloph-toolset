@@ -9,8 +9,8 @@ from typing import Annotated, Any
 import pytest
 from annotated_types import Ge
 
-from coloph_toolset import Leaf, ToolDefinition, tool, tool_for
-from coloph_toolset.pydantic_ai import PydanticAIAdapter
+from coloph_toolset import GroupNode, HierarchicalState, Leaf, ToolDefinition, build_index, tool, tool_for
+from coloph_toolset.pydantic_ai import PydanticAIAdapter, PydanticAIHierarchicalAdapter
 
 pydantic_ai = pytest.importorskip("pydantic_ai")
 ModelRetry = pydantic_ai.ModelRetry
@@ -145,3 +145,90 @@ def test_register_exposes_only_the_supplied_selection() -> None:
     PydanticAIAdapter(Deps, lambda deps, _tool: deps, lambda *_args: "ok").register(agent, [definition(first, "first")])
 
     assert [wrapper.__name__ for wrapper in agent.tools] == ["demo_first"]
+
+
+def test_direct_adapter_signals_terminal_only_after_success() -> None:
+    @tool(terminal=True)
+    def finish(ctx: object) -> str:
+        return "finished"
+
+    terminal: list[tuple[str, str]] = []
+    agent = FakeAgent()
+    [wrapper] = PydanticAIAdapter(
+        Deps,
+        lambda deps, _tool: deps,
+        lambda *_args: "finished",
+        on_terminal=lambda _deps, tool_definition, result: terminal.append((tool_definition.dotted, result)),
+    ).register(agent, [definition(finish)])
+
+    assert asyncio.run(wrapper(SimpleNamespace(deps=Deps("x")))) == "finished"
+    assert terminal == [("demo.sample", "finished")]
+
+
+@dataclass
+class HierarchicalDeps:
+    state: HierarchicalState
+    values: list[int]
+
+
+def test_hierarchical_adapter_browses_gates_executes_and_finishes() -> None:
+    @tool(terminal=True)
+    def add(ctx: object, value: Annotated[int, Ge(1)]) -> int:
+        """Add one value."""
+        return value
+
+    catalog = build_index(
+        GroupNode("root", "Root", children=(GroupNode("numbers", "Numbers", children=(Leaf("add", add),)),))
+    )
+    definition = catalog.by_dotted["numbers.add"]
+    terminal: list[tuple[str, int]] = []
+
+    async def invoke(_tool: ToolDefinition, deps: HierarchicalDeps, args: dict[str, Any]) -> int:
+        deps.values.append(args["value"])
+        return args["value"]
+
+    agent = FakeAgent()
+    adapter = PydanticAIHierarchicalAdapter(
+        HierarchicalDeps,
+        lambda deps, _tool: deps,
+        invoke,
+        state_factory=lambda deps: deps.state,
+        on_terminal=lambda _deps, tool_definition, result: terminal.append((tool_definition.dotted, result)),
+    )
+    [wrapper] = adapter.register(agent, (definition,))
+    deps = HierarchicalDeps(HierarchicalState(), [])
+    context = SimpleNamespace(deps=deps)
+
+    group = asyncio.run(wrapper(context))
+    first = asyncio.run(wrapper(context, command_path="add", arguments={"value": 2}))
+    result = asyncio.run(wrapper(context, command_path="add", arguments={"value": 2}))
+
+    assert group["command_invoked"] is False
+    assert first["command_invoked"] is False
+    assert result == 2
+    assert deps.values == [2]
+    assert terminal == [("numbers.add", 2)]
+
+
+def test_hierarchical_adapter_turns_path_errors_into_model_retry() -> None:
+    @tool()
+    def run(ctx: object) -> str:
+        return "done"
+
+    definition = ToolDefinition(("work", "run"), Leaf("run", run), tool_for(run), {})
+    agent = FakeAgent()
+    [wrapper] = PydanticAIHierarchicalAdapter(
+        HierarchicalDeps,
+        lambda deps, _tool: deps,
+        lambda *_args: "done",
+        state_factory=lambda deps: deps.state,
+    ).register(agent, (definition,))
+
+    with pytest.raises(ModelRetry, match="Invalid command path segment 1: 'missing'"):
+        asyncio.run(
+            wrapper(
+                SimpleNamespace(deps=HierarchicalDeps(HierarchicalState(), [])),
+                command_path="missing",
+                arguments={},
+            )
+        )

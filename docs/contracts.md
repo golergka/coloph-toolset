@@ -29,6 +29,17 @@ These declarations fail explicitly. `ToolRuntime.invoke()` awaits asynchronous f
 
 ## Metadata
 
+`@tool()` also accepts adapter-neutral native metadata:
+
+- `model_example` is validated against the public argument contract when the declaration is created.
+- `required_documents` names documents supplied through a hierarchical adapter's loader.
+- `first_use_guidance` adds mandatory text to the first-use gate.
+- `post_execution_first_use_documentation` permits a successful first call to return its documentation with its result.
+- `terminal` marks a successful business result as an invocation completion signal.
+
+These values do not authorize a tool or execute it. Adapters apply them after
+the application supplies an explicit catalog selection.
+
 One string in `Annotated` supplies the argument description.
 Supported Pydantic `Field` options are `description`, `title`, `examples`, `gt`, `ge`, `lt`, `le`, `multiple_of`, `min_length`, `max_length`, `pattern`, and `strict`.
 Direct `annotated_types.Gt`, `Ge`, `Lt`, `Le`, `MultipleOf`, `MinLen`, and `MaxLen` metadata also works, as does `pydantic.Strict`.

@@ -15,7 +15,7 @@ import types
 import typing
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Annotated, Any, Callable, Literal, Union, get_args, get_origin
+from typing import Annotated, Any, Callable, Literal, Mapping, Union, get_args, get_origin
 
 _MISSING = inspect.Parameter.empty
 _NONE_TYPE = type(None)
@@ -67,6 +67,11 @@ class Tool:
     fn: Callable[..., Any]
     model_hidden_args: tuple[str, ...] = ()
     metadata_types: tuple[type, ...] = ()
+    model_example: tuple[tuple[str, Any], ...] | None = None
+    post_execution_first_use_documentation: bool = False
+    first_use_guidance: str | None = None
+    required_documents: tuple[str, ...] = ()
+    terminal: bool = False
 
     def __post_init__(self) -> None:
         self.metadata_types = tuple(dict.fromkeys((*self.metadata_types, Cli)))
@@ -85,7 +90,15 @@ class Tool:
             raise TypeError("model_hidden_args must not contain duplicates")
         if any(not isinstance(marker, type) for marker in self.metadata_types):
             raise TypeError("metadata_types must contain marker types")
+        if len(set(self.required_documents)) != len(self.required_documents):
+            raise TypeError("required_documents must not contain duplicates")
+        if any(not isinstance(name, str) or not name.strip() for name in self.required_documents):
+            raise TypeError("required_documents must contain non-empty names")
+        if self.first_use_guidance is not None and not self.first_use_guidance.strip():
+            raise TypeError("first_use_guidance must be non-empty when supplied")
         _validate_signature(self)
+        if self.model_example is not None:
+            self.validate_arguments(dict(self.model_example))
 
     @cached_property
     def params(self) -> tuple[ToolParam, ...]:
@@ -139,6 +152,11 @@ def tool(
     *,
     model_hidden_args: tuple[str, ...] = (),
     metadata_types: tuple[type, ...] = (),
+    model_example: Mapping[str, Any] | None = None,
+    post_execution_first_use_documentation: bool = False,
+    first_use_guidance: str | None = None,
+    required_documents: tuple[str, ...] = (),
+    terminal: bool = False,
 ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """Attach a `Tool` description to `fn` as `fn.tool`.
 
@@ -147,12 +165,31 @@ def tool(
     safe default or runtime resolver for each hidden argument.
     `metadata_types` names application-owned `Annotated` markers that are
     retained for adapters but excluded from validation and JSON Schema.
+    `model_example` supplies a validated example for generated native calls.
+    `required_documents` names application-loaded documents that hierarchical
+    adapters deliver before first execution. `first_use_guidance` is included
+    in that gate. `post_execution_first_use_documentation` is an explicit
+    opt-in for safe tools whose first successful result can include the packet.
+    `terminal` lets an adapter finish its invocation after successful dispatch.
     """
 
     def decorator(fn: Callable[..., Any]) -> Callable[..., Any]:
         if hasattr(fn, "tool"):
             raise TypeError(f"{fn.__qualname__}: function already has a tool declaration")
-        setattr(fn, "tool", Tool(fn, tuple(model_hidden_args), tuple(metadata_types)))
+        setattr(
+            fn,
+            "tool",
+            Tool(
+                fn,
+                tuple(model_hidden_args),
+                tuple(metadata_types),
+                tuple(model_example.items()) if model_example is not None else None,
+                post_execution_first_use_documentation,
+                first_use_guidance,
+                tuple(required_documents),
+                terminal,
+            ),
+        )
         return fn
 
     return decorator

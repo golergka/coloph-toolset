@@ -17,3 +17,12 @@ Unclassified failures and cancellation propagate.
 The application owns the model, provider, dependencies, authorization,
 resources, persistence, budgets, transcripts, and result presentation. Core
 package imports do not load Pydantic AI.
+
+`PydanticAIHierarchicalAdapter` registers one tool for each visible root in an
+explicit selection. Its `state_factory` returns invocation-owned
+`HierarchicalState`. The adapter uses the same context and invocation
+callbacks as direct registration. Correctable path and leaf-validation errors
+become model retries.
+
+The optional `on_terminal` callback runs only after a terminal leaf succeeds.
+The application decides how that signal ends its model loop.

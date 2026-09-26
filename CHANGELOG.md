@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0
+
+- Add authorized root discovery and validated hierarchical leaf dispatch.
+- Add invocation-owned first-use state and a document loader with content fingerprints.
+- Prevent concurrent calls from passing a first-use gate before its packet is ready.
+- Repeat documentation when loaded content changes and retain an undelivered state after loader failure.
+- Add post-execution documentation and terminal success signals.
+- Add optional hierarchical Pydantic AI registration without changing direct registration or CLI paths.
+- Add the standalone hierarchical order agent example. Keep all earlier examples.
+
 ## 0.5.0
 
 - Add optional direct Pydantic AI tool registration for an explicit catalog selection.

@@ -1,9 +1,4 @@
-"""Generated Starlette routes for an authorized tool selection.
-
-This file began as Coloph's ``api/_tool_routes.py``. Applications provide
-authentication, per-request authorization, context construction, invocation,
-and response enrichment. The adapter owns HTTP decoding and error mapping.
-"""
+"""Generated Starlette routes for an authorized tool selection."""
 
 from __future__ import annotations
 

@@ -1,9 +1,4 @@
-"""Validated sync and async tool invocation.
-
-This file began as Coloph's ``core/tools/_invoke.py``. The public runtime keeps
-the lifecycle ordering and turns Coloph authorization, references, database
-transactions, workflow policies, and audit writes into explicit callbacks.
-"""
+"""Validated sync and async tool invocation."""
 
 from __future__ import annotations
 

@@ -1,9 +1,4 @@
-"""Result presentation and explicit output limiting.
-
-This file began as Coloph's ``core/tools/_text.py``. The public runtime does
-not replace or route process-global stdout. Applications that need legacy
-stdout capture can wrap their callable before passing it to the runtime.
-"""
+"""Result presentation and explicit output limiting."""
 
 from __future__ import annotations
 
