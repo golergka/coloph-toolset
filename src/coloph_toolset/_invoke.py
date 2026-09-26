@@ -16,7 +16,6 @@ from ._ctx import ToolContext
 from ._decorator import Tool, tool_for
 from ._text import PresentedOutput, ToolOutput, canonical_output, limit_output
 
-
 DependenciesT = TypeVar("DependenciesT")
 StateT = TypeVar("StateT")
 ResourceT = TypeVar("ResourceT")

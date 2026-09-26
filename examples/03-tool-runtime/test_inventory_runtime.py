@@ -1,10 +1,10 @@
 import asyncio
 
 import pytest
+from inventory_runtime import Inventory, Session, available, build_runtime, reserve, reserve_text
 from pydantic import ValidationError
 
 from coloph_toolset import InvocationError
-from inventory_runtime import Inventory, Session, available, build_runtime, reserve, reserve_text
 
 
 def test_sync_and_async_calls_with_explicit_shared_state() -> None:

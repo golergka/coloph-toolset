@@ -10,7 +10,6 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import Generic, TypeVar
 
-
 DependenciesT = TypeVar("DependenciesT")
 StateT = TypeVar("StateT")
 ResourceT = TypeVar("ResourceT")

@@ -20,6 +20,7 @@ from ._call_codec import (
 )
 from ._cli import build_parser_from_tree
 from ._compiled_tree import CompiledToolTree, CompiledToolTreeNode
+from ._ctx import ToolContext
 from ._decorator import (
     Cli,
     DeclarationError,
@@ -31,7 +32,6 @@ from ._decorator import (
     tool_for,
 )
 from ._index import ToolCatalog, ToolDefinition, ToolSelection, TreeEntry, build_index, resolve_tool
-from ._ctx import ToolContext
 from ._invoke import (
     Finalization,
     InvocationError,
