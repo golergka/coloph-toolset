@@ -60,5 +60,6 @@ The runtime does not capture stdout. Wrap a legacy callable explicitly if an app
 Use `await runtime.invoke(...)` in asynchronous code. This method supports synchronous and asynchronous tools, callbacks, hooks, and resources.
 
 Use `runtime.invoke_sync(...)` outside an event loop. This method runs asynchronous tools and waits for completion.
+It runs synchronous tool bodies without an active event loop, so a synchronous body can own an event loop when required.
 
 `invoke_sync()` raises an error inside an active event loop. This rule prevents coroutine strings and nested event loops.

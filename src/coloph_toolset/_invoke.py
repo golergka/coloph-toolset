@@ -323,7 +323,148 @@ class ToolRuntime(Generic[DependenciesT, StateT, ResourceT]):
             pass
         else:
             raise RuntimeError("invoke_sync cannot run inside an active event loop; await invoke instead")
-        return asyncio.run(self.invoke(declared, arguments, **kwargs))
+        with asyncio.Runner() as runner:
+            return self._invoke_sync(runner, declared, arguments, **kwargs)
+
+    def _invoke_sync(
+        self,
+        runner: asyncio.Runner,
+        declared: Tool | Callable[..., Any],
+        arguments: Mapping[str, Any],
+        *,
+        state: StateT | object = _STATE_NOT_SUPPLIED,
+        call: Callable[..., Any] | None = None,
+        presenter: Callable[[ToolContext[DependenciesT, StateT, ResourceT], Any], ToolOutput] | None = None,
+        max_output_chars: int | None = None,
+    ) -> InvocationResult:
+        """Run the lifecycle while sync callbacks execute outside the event loop."""
+
+        def resolve(value: Any) -> Any:
+            return runner.run(_await_if_needed(value)) if inspect.isawaitable(value) else value
+
+        def emit(event: InvocationEvent) -> None:
+            resolve(self._emit(event))
+
+        tool = declared if isinstance(declared, Tool) else tool_for(declared)
+        body = call or tool.fn
+        call_state = self.state_factory() if state is _STATE_NOT_SUPPLIED else cast(StateT, state)
+        context = ToolContext[DependenciesT, StateT, ResourceT](self.dependencies, call_state)
+
+        emit(InvocationEvent("validation", "started"))
+        try:
+            validated = tool.validate_arguments(dict(arguments))
+        except BaseException as exc:
+            emit(InvocationEvent("validation", "failed", error=exc))
+            raise
+        emit(InvocationEvent("validation", "succeeded"))
+
+        if self.availability is not None:
+            emit(InvocationEvent("availability", "started"))
+            try:
+                available = resolve(self.availability(tool, context, dict(validated)))
+                if not available:
+                    raise ToolUnavailableError(f"{tool.fn.__qualname__} is unavailable")
+            except BaseException as exc:
+                emit(InvocationEvent("availability", "failed", error=exc))
+                raise
+            emit(InvocationEvent("availability", "succeeded"))
+
+        resource: ResourceT | None = None
+        acquired = False
+        finalization = Finalization()
+        if self.resources is not None:
+            emit(InvocationEvent("acquisition", "started"))
+            try:
+                resource = cast(ResourceT, resolve(self.resources.acquire(context)))
+                acquired = True
+                context = context.with_resource(resource)
+            except BaseException as exc:
+                emit(InvocationEvent("acquisition", "failed", error=exc))
+                raise InvocationError("acquisition", exc) from exc
+            emit(InvocationEvent("acquisition", "succeeded"))
+
+        phase: InvocationPhase = "resolution"
+        primary_error: BaseException | None = None
+        result: Any = None
+        metadata: dict[str, Any] = {}
+        try:
+            if self.resolve_arguments is not None:
+                emit(InvocationEvent("resolution", "started"))
+                validated = dict(resolve(self.resolve_arguments(tool, context, dict(validated))))
+                emit(InvocationEvent("resolution", "succeeded"))
+
+            phase = "before_call"
+            hook_states: list[tuple[ToolHook[DependenciesT, StateT, ResourceT], Any]] = []
+            if self.hooks:
+                emit(InvocationEvent("before_call", "started"))
+                for hook in self.hooks:
+                    hook_states.append((hook, resolve(hook.before_call(tool, context, dict(validated)))))
+                emit(InvocationEvent("before_call", "succeeded"))
+
+            phase = "body"
+            emit(InvocationEvent("body", "started"))
+            result = resolve(body(context, **validated))
+            emit(InvocationEvent("body", "succeeded"))
+
+            phase = "after_success"
+            if hook_states:
+                emit(InvocationEvent("after_success", "started"))
+                for hook, hook_state in hook_states:
+                    hook_metadata = resolve(hook.after_success(tool, context, dict(validated), result, hook_state))
+                    metadata.update(hook_metadata)
+                emit(InvocationEvent("after_success", "succeeded"))
+        except BaseException as exc:
+            primary_error = exc
+            status: InvocationStatus = "cancelled" if isinstance(exc, asyncio.CancelledError) else "failed"
+            emit(InvocationEvent(phase, status, error=exc))
+
+        cleanup_error: BaseException | None = None
+        if acquired:
+            assert self.resources is not None
+            assert resource is not None
+            try:
+                emit(InvocationEvent("finalization", "started"))
+                finalization = cast(Finalization, resolve(self.resources.finalize(context, resource, primary_error)))
+                metadata.update(finalization.metadata)
+                emit(InvocationEvent("finalization", "succeeded", committed=finalization.committed))
+            except BaseException as exc:
+                cleanup_error = exc
+                emit(InvocationEvent("finalization", "failed", error=exc))
+
+        if primary_error is not None:
+            if isinstance(primary_error, asyncio.CancelledError):
+                if cleanup_error is not None:
+                    primary_error.add_note(f"resource cleanup also failed: {cleanup_error}")
+                raise primary_error
+            raise InvocationError(
+                phase,
+                primary_error,
+                committed=finalization.committed,
+                cleanup_error=cleanup_error,
+            ) from primary_error
+        if cleanup_error is not None:
+            raise InvocationError("finalization", cleanup_error, committed=finalization.committed) from cleanup_error
+
+        emit(InvocationEvent("presentation", "started", committed=finalization.committed))
+        try:
+            presentation = canonical_output(
+                result,
+                None if presenter is None else lambda raw: presenter(context, raw),
+            )
+            limited: PresentedOutput = limit_output(presentation, max_output_chars)
+        except BaseException as exc:
+            emit(InvocationEvent("presentation", "failed", committed=finalization.committed, error=exc))
+            raise InvocationError("presentation", exc, committed=finalization.committed) from exc
+        emit(InvocationEvent("presentation", "succeeded", committed=finalization.committed))
+        emit(InvocationEvent("complete", "succeeded", committed=finalization.committed))
+        return InvocationResult(
+            raw=result,
+            output=limited.value,
+            truncated=limited.truncated,
+            original_output_chars=limited.original_chars,
+            committed=finalization.committed,
+            metadata=metadata,
+        )
 
 
 __all__ = [

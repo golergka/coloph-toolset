@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1
+
+- Run synchronous tool bodies without an active event loop.
+- Continue to await asynchronous tools and callbacks exactly once from the synchronous entrypoint.
+
 ## 0.3.0
 
 - Add `ToolRuntime` for validated synchronous and asynchronous calls.
