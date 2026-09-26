@@ -285,6 +285,14 @@ def test_sync_entrypoint_rejects_an_active_event_loop_without_calling_body() -> 
     assert calls == []
 
 
+def test_sync_body_runs_without_an_active_event_loop() -> None:
+    @tool()
+    def sample(ctx: ToolContext[dict[str, Any], State, object]) -> str:
+        return asyncio.run(asyncio.sleep(0, result="done"))
+
+    assert runtime().invoke_sync(sample, {}).output == "done"
+
+
 def test_concurrent_calls_have_independent_context_and_resources() -> None:
     resources: list[object] = []
 
