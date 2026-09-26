@@ -24,7 +24,10 @@ def main() -> None:
         environment = temporary / "environment"
         subprocess.run(["uv", "venv", "--python", sys.executable, str(environment)], check=True)
         python = environment / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
-        subprocess.run(["uv", "pip", "install", "--python", str(python), wheel, "pytest"], check=True)
+        subprocess.run(
+            ["uv", "pip", "install", "--python", str(python), f"{wheel}[http]", "httpx", "pytest"],
+            check=True,
+        )
         for example in sorted((root / "examples").iterdir()):
             if not example.is_dir():
                 continue

@@ -2,7 +2,7 @@
 
 Declare Python tools once. Export their schema, organize them in catalogs, and run validated synchronous or asynchronous calls.
 
-Version 0.3 adds typed context, resources, lifecycle hooks, explicit results, and sync or async execution.
+Version 0.4 adds generated Starlette endpoints while preserving the declaration, catalog, CLI, and runtime APIs.
 The application owns authorization, business dependencies, resource behavior, and model providers.
 The [roadmap](docs/roadmap.md) describes later adapters. The package remains on `0.x` while its interfaces settle.
 
@@ -14,6 +14,7 @@ uv add coloph-toolset
 
 The package requires Python 3.11 or later and Pydantic 2.12 or later within major version 2.
 No Coloph installation, database, credentials, HTTP framework, or agent framework is required.
+Install the optional HTTP adapter with `uv add "coloph-toolset[http]"`.
 
 ## Declare and validate
 
@@ -93,9 +94,11 @@ Argument projection is not an authorization system.
 - [Argument contract and API](docs/contracts.md)
 - [Catalog and CLI contract](docs/catalogs-cli.md)
 - [Runtime contract](docs/runtime.md)
+- [Starlette HTTP adapter](docs/http.md)
 - [Standalone shipping-quote project](examples/01-tool-declarations/README.md)
 - [Standalone task CLI](examples/02-task-cli/README.md)
 - [Standalone inventory runtime](examples/03-tool-runtime/README.md)
+- [Standalone authenticated HTTP tools](examples/04-http-tools/README.md)
 - [Development and release procedure](CONTRIBUTING.md)
 - [Changes](CHANGELOG.md)
 

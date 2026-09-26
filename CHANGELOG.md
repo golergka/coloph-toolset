@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0
+
+- Add an optional Starlette adapter for generated tool endpoints.
+- Authenticate and authorize requests before application context creation.
+- Share canonical argument normalization between HTTP and direct invocation.
+- Map validation, authorization, user, and internal failures to distinct responses.
+- Run synchronous invocation callbacks outside the HTTP event loop and await asynchronous callbacks once.
+- Add the standalone authenticated HTTP tool service example. Keep all earlier examples.
+
 ## 0.3.1
 
 - Run synchronous tool bodies without an active event loop.
