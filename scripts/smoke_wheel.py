@@ -25,7 +25,7 @@ def main() -> None:
         subprocess.run(["uv", "venv", "--python", sys.executable, str(environment)], check=True)
         python = environment / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
         subprocess.run(
-            ["uv", "pip", "install", "--python", str(python), f"{wheel}[http]", "httpx", "pytest"],
+            ["uv", "pip", "install", "--python", str(python), f"{wheel}[http,pydantic-ai]", "httpx", "pytest"],
             check=True,
         )
         for example in sorted((root / "examples").iterdir()):

@@ -6,7 +6,7 @@ The extraction plan tracks six sequential releases.
 2. Catalogs, lazy trees, CLI generation, and a task CLI example.
 3. Invocation, typed context, results, sync/async execution, and a runtime example. Released in 0.3.
 4. An optional HTTP adapter and a standalone service example. Released in 0.4.
-5. An optional Pydantic AI adapter and a deterministic agent example.
+5. An optional Pydantic AI adapter and a deterministic agent example. Released in 0.5.
 6. Hierarchical discovery, documentation gates, terminal controls, and a hierarchical agent example.
 
 Each milestone adds a project under `examples/` and preserves every previous project.

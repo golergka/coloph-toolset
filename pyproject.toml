@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "coloph-toolset"
-version = "0.4.0"
+version = "0.5.0"
 description = "Declare, organize, validate, and run synchronous or asynchronous Python tools."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -19,6 +19,7 @@ classifiers = [
 
 [project.optional-dependencies]
 http = ["starlette>=0.52,<1"]
+pydantic-ai = ["pydantic-ai>=1.93,<2"]
 
 [project.urls]
 Repository = "https://github.com/golergka/coloph-toolset"
@@ -33,6 +34,7 @@ dev = [
   "build>=1.2,<2",
   "httpx>=0.28,<1",
   "starlette>=0.52,<1",
+  "pydantic-ai>=1.93,<2",
 ]
 
 [tool.hatch.build.targets.wheel]

@@ -2,7 +2,7 @@
 
 Declare Python tools once. Export their schema, organize them in catalogs, and run validated synchronous or asynchronous calls.
 
-Version 0.4 adds generated Starlette endpoints while preserving the declaration, catalog, CLI, and runtime APIs.
+Version 0.5 adds direct Pydantic AI registration while preserving the declaration, catalog, CLI, runtime, and HTTP APIs.
 The application owns authorization, business dependencies, resource behavior, and model providers.
 The [roadmap](docs/roadmap.md) describes later adapters. The package remains on `0.x` while its interfaces settle.
 
@@ -15,6 +15,7 @@ uv add coloph-toolset
 The package requires Python 3.11 or later and Pydantic 2.12 or later within major version 2.
 No Coloph installation, database, credentials, HTTP framework, or agent framework is required.
 Install the optional HTTP adapter with `uv add "coloph-toolset[http]"`.
+Install the optional Pydantic AI adapter with `uv add "coloph-toolset[pydantic-ai]"`.
 
 ## Declare and validate
 
@@ -95,10 +96,12 @@ Argument projection is not an authorization system.
 - [Catalog and CLI contract](docs/catalogs-cli.md)
 - [Runtime contract](docs/runtime.md)
 - [Starlette HTTP adapter](docs/http.md)
+- [Pydantic AI adapter](docs/pydantic-ai.md)
 - [Standalone shipping-quote project](examples/01-tool-declarations/README.md)
 - [Standalone task CLI](examples/02-task-cli/README.md)
 - [Standalone inventory runtime](examples/03-tool-runtime/README.md)
 - [Standalone authenticated HTTP tools](examples/04-http-tools/README.md)
+- [Standalone deterministic Pydantic AI agent](examples/05-pydantic-agent/README.md)
 - [Development and release procedure](CONTRIBUTING.md)
 - [Changes](CHANGELOG.md)
 

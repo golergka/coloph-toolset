@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0
+
+- Add optional direct Pydantic AI tool registration for an explicit catalog selection.
+- Derive registered signatures from canonical declarations and omit hidden arguments.
+- Create typed application context per call, await asynchronous callbacks, and keep synchronous callbacks off the event loop.
+- Preserve cancellation and internal failures while allowing applications to classify correctable errors as model retries.
+- Add the standalone deterministic Pydantic AI agent example. Keep all earlier examples.
+
 ## 0.4.0
 
 - Add an optional Starlette adapter for generated tool endpoints.
