@@ -64,6 +64,7 @@ class HierarchicalCompletion:
 DocumentNames = Callable[[ToolDefinition], Sequence[str]]
 PacketRenderer = Callable[[ToolDefinition, bool], str]
 ArgumentModel = Callable[[ToolDefinition], Any]
+DocumentRenderer = Callable[[Documentation], str]
 
 
 def root_dispatch_schema() -> dict[str, Any]:
@@ -240,6 +241,7 @@ class HierarchicalToolAdapter:
         document_loader: DocumentationLoader | None = None,
         packet_renderer: PacketRenderer = first_use_packet,
         argument_model: ArgumentModel | None = None,
+        document_renderer: DocumentRenderer | None = None,
     ) -> None:
         self.tools = tuple(tools)
         self.tree = CompiledToolTree(self.tools)
@@ -248,6 +250,9 @@ class HierarchicalToolAdapter:
         self._document_names = document_names or (lambda tool: tuple(getattr(tool.tool, "required_documents", ())))
         self._document_loader = document_loader
         self._packet_renderer = packet_renderer
+        self._document_renderer = document_renderer or (
+            lambda document: f"## Required document: {document.name}\n{document.text}"
+        )
 
     @property
     def root_names(self) -> tuple[str, ...]:
@@ -278,8 +283,10 @@ class HierarchicalToolAdapter:
         return documents
 
     @staticmethod
-    def _documents_changed(state: HierarchicalState, documents: Sequence[Documentation]) -> bool:
-        return any(state.document_fingerprints.get(document.name) != document.fingerprint for document in documents)
+    def _pending_documents(state: HierarchicalState, documents: Sequence[Documentation]) -> tuple[Documentation, ...]:
+        return tuple(
+            document for document in documents if state.document_fingerprints.get(document.name) != document.fingerprint
+        )
 
     @staticmethod
     def _record_delivery(
@@ -290,9 +297,8 @@ class HierarchicalToolAdapter:
         state.delivered_tools.add(tool.dotted)
         state.document_fingerprints.update({document.name: document.fingerprint for document in documents})
 
-    @staticmethod
-    def _document_sections(documents: Sequence[Documentation]) -> str:
-        return "\n\n".join(f"## Required document: {document.name}\n{document.text}" for document in documents)
+    def _document_sections(self, documents: Sequence[Documentation]) -> str:
+        return "\n\n".join(self._document_renderer(document) for document in documents)
 
     def _packet(
         self,
@@ -347,11 +353,11 @@ class HierarchicalToolAdapter:
         tool = node.tool
         with state.lock:
             documents = self._documents(tool)
-            changed = self._documents_changed(state, documents)
+            pending_documents = self._pending_documents(state, documents)
             guidance = str(getattr(tool.tool, "first_use_guidance", None) or "").strip()
             post_execution = bool(getattr(tool.tool, "post_execution_first_use_documentation", False))
             needs_documentation = tool.dotted not in required_tool_ids and (
-                tool.dotted not in state.delivered_tools or changed
+                tool.dotted not in state.delivered_tools or bool(pending_documents)
             )
             if guidance and tool.dotted not in state.guidance_seen:
                 state.guidance_seen.add(tool.dotted)
@@ -362,8 +368,8 @@ class HierarchicalToolAdapter:
                         "only if it is still the correct action."
                     )
             if needs_documentation and not post_execution:
-                packet = self._packet(tool, command_invoked=False, documents=documents, guidance=guidance)
-                self._record_delivery(state, tool, documents)
+                packet = self._packet(tool, command_invoked=False, documents=pending_documents, guidance=guidance)
+                self._record_delivery(state, tool, pending_documents)
                 return {"documentation": packet, "command_invoked": False}
 
             try:
@@ -382,7 +388,7 @@ class HierarchicalToolAdapter:
                 tool=tool,
                 arguments=validated,
                 append_documentation=needs_documentation and post_execution,
-                documents=documents,
+                documents=pending_documents,
             )
 
     def complete(

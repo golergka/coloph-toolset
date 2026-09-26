@@ -177,6 +177,30 @@ def test_loader_failure_does_not_record_delivery() -> None:
     assert state.document_fingerprints == {}
 
 
+def test_preloaded_document_is_not_repeated_and_application_controls_its_heading() -> None:
+    @tool(required_documents=("operations",))
+    def run(ctx: object) -> str:
+        return "done"
+
+    [definition] = _tools(("work", "run", run))
+    document = Documentation("operations", "Read this.", "current")
+    adapter = HierarchicalToolAdapter(
+        (definition,),
+        document_loader=lambda _names, _tool: (document,),
+        document_renderer=lambda loaded: f"## Required guide: {loaded.name}\n{loaded.text}",
+    )
+    payload = {"command_path": "run", "arguments": {}}
+
+    preloaded = HierarchicalState(document_fingerprints={"operations": "current"})
+    first = adapter.prepare("work", payload, preloaded)
+    assert isinstance(first, dict)
+    assert "Read this." not in first["documentation"]
+
+    fresh = adapter.prepare("work", payload, HierarchicalState())
+    assert isinstance(fresh, dict)
+    assert "## Required guide: operations\nRead this." in fresh["documentation"]
+
+
 def test_required_tool_bypasses_gate_after_prompt_delivery() -> None:
     @tool(first_use_guidance="Confirm the effect.")
     def run(ctx: object) -> str:

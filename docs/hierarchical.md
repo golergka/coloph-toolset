@@ -37,6 +37,10 @@ The next valid call can execute. State belongs to one invocation. A changed
 fingerprint causes the document to be delivered again. A loader exception or
 an omitted document records no delivery.
 
+Documents whose current fingerprints are already in the invocation state are
+not repeated. The optional `document_renderer` callback controls the heading
+and presentation of each newly loaded document.
+
 The state lock covers document loading, packet construction, and the delivery
 decision. Concurrent first-use calls cannot prepare business execution while
 the first packet is still being built.

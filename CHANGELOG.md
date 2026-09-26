@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.1
+
+- Let applications render loaded document sections with domain-specific labels.
+- Omit unchanged documents that are already present in invocation context while preserving the leaf documentation gate.
+
 ## 0.6.0
 
 - Add authorized root discovery and validated hierarchical leaf dispatch.
