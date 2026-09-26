@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.2
+
+- Remove private host-application references from public documentation and source text.
+- Preserve all 0.6 hierarchical, adapter, runtime, catalog, and declaration contracts.
+
 ## 0.6.1
 
 - Let applications render loaded document sections with domain-specific labels.

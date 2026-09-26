@@ -362,7 +362,7 @@ def _describe_annotation(
     resolved: Any,
     metadata_types: tuple[type, ...],
 ) -> tuple[type, tuple[Any, ...] | None, bool, bool, str, tuple[Any, ...]]:
-    """Return the original Coloph parameter shape plus its generic metadata."""
+    """Return the declared parameter shape plus its generic metadata."""
     state: dict[str, Any] = {"description": "", "metadata": []}
 
     def consume(metadata: tuple[Any, ...]) -> None:

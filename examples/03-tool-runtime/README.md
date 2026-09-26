@@ -11,4 +11,4 @@ uv run --group dev pytest
 
 The tests also show the distinct outcomes for invalid input, body failure,
 commit failure, and presentation failure after committed work. The example
-needs no Coloph checkout, database, credentials, or private service.
+needs no host application checkout, database, credentials, or private service.

@@ -13,7 +13,7 @@ uv add coloph-toolset
 ```
 
 The package requires Python 3.11 or later and Pydantic 2.12 or later within major version 2.
-No Coloph installation, database, credentials, HTTP framework, or agent framework is required.
+The core package requires no database, credentials, HTTP framework, or agent framework.
 Install the optional HTTP adapter with `uv add "coloph-toolset[http]"`.
 Install the optional Pydantic AI adapter with `uv add "coloph-toolset[pydantic-ai]"`.
 
