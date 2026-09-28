@@ -7,7 +7,7 @@ import functools
 import inspect
 from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar, cast
+from typing import Annotated, Any, Generic, TypeVar, cast
 
 from ._decorator import annotation_with_description
 from ._index import ToolDefinition
@@ -39,6 +39,16 @@ async def _call(callback: Callable[..., Any], *args: Any) -> Any:
     return await result if inspect.isawaitable(result) else result
 
 
+def _pydantic_annotation(fn: Callable[..., Any], parameter: inspect.Parameter, description: str) -> Any:
+    """Localize one parameter description for both Coloph and Pydantic."""
+    annotation = annotation_with_description(fn, parameter, description)
+    if not description:
+        return annotation
+    from pydantic import Field
+
+    return Annotated[annotation, Field(description=description)]
+
+
 def register_pydantic_ai_tool(
     agent: Any,
     *,
@@ -61,7 +71,7 @@ def register_pydantic_ai_tool(
     if not sig_params:
         raise TypeError(f"{tool_name}: tool callable must have a leading context parameter")
     localized_params = [
-        parameter.replace(annotation=annotation_with_description(fn, parameter, param_descriptions[parameter.name]))
+        parameter.replace(annotation=_pydantic_annotation(fn, parameter, param_descriptions[parameter.name]))
         if parameter.name in param_descriptions
         else parameter
         for parameter in sig_params[1:]

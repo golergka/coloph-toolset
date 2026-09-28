@@ -14,6 +14,7 @@ from coloph_toolset.pydantic_ai import PydanticAIAdapter, PydanticAIHierarchical
 
 pydantic_ai = pytest.importorskip("pydantic_ai")
 ModelRetry = pydantic_ai.ModelRetry
+PydanticTool = pydantic_ai.Tool
 
 
 class FakeAgent:
@@ -50,6 +51,30 @@ def test_registers_canonical_public_signature_without_hidden_arguments() -> None
     assert wrapper.__name__ == "demo_sample"
     assert wrapper.__doc__ == "Create a sample."
     assert list(inspect.signature(wrapper).parameters) == ["ctx", "quantity", "label"]
+
+
+def test_registered_tool_schema_preserves_parameter_descriptions() -> None:
+    @tool()
+    def sample(
+        ctx: object,
+        query: Annotated[str, "A raw FTS5 expression"],
+        limit: Annotated[int, "Maximum result count", Ge(1)] = 5,
+    ) -> str:
+        """Search indexed text."""
+        return query
+
+    agent = FakeAgent()
+    [wrapper] = PydanticAIAdapter(
+        Deps,
+        lambda deps, _tool: deps,
+        lambda _tool, _deps, args: args,
+    ).register(agent, [definition(sample)])
+
+    schema = PydanticTool(wrapper).function_schema.json_schema
+
+    assert schema["properties"]["query"]["description"] == "A raw FTS5 expression"
+    assert schema["properties"]["limit"]["description"] == "Maximum result count"
+    assert schema["properties"]["limit"]["minimum"] == 1
 
 
 def test_typed_context_and_async_invocation_are_awaited_once() -> None:
