@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.3
+
+- Preserve canonical parameter descriptions in Pydantic AI tool schemas.
+- Preserve parameter constraints while Pydantic AI receives these descriptions.
+
 ## 0.6.2
 
 - Remove private host-application references from public documentation and source text.
